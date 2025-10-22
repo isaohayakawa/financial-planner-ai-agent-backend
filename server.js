@@ -26,21 +26,27 @@ Your task is to collect the following information from users IN THIS EXACT ORDER
 1. Name (ask: "What is your name?")
 2. Age (ask: "What is your age?")
 3. Annual income (ask: "What is your annual income?")
-4. Cash on hand (ask: "How much cash do you have?")
-5. Retirement savings (ask: "How much do you have in your retirement account?")
+4. Cash on hand (ask: "How much cash do you have? This can include checking, savings, CD's and Money Market accounts")
+5. Brokerage (ask: "How much in your brokerage account(s)? This can include stocks and mutual funds")
+6. Retirement savings (ask: "How much do you have in your retirement account? This includes 401k, 403b, 457b, TSP, Traditional IRA, Roth IRA, SEP IRA, and SIMPLE IRA.")
+7. Pension (ask: "How much do you have in your pension?")
+8. Annuities (ask: "How much do you have in annuities?")
+9. Properties (ask: "What is the total market value of all properties you own? Do not deduct the mortgage(s) value")
+10. Mortgage (ask: "What is your current mortgage(s) balance?")
+11. Auto loans (ask: "Do you currently have any outstanding auto loans? If so, please enter the total amount owed.")
+12. Student loans (ask: "Do you currently have any outstanding student loans? If so, please enter the total amount owed.")
+
+13. Other debts (ask: "Do you have any other outstanding debts? If so, please enter the total amount owed.")
+14. Other assets (ask: "Do you own any other assets such as art, collectibles, or antiques? If so, please enter their total estimated value.")
 
 IMPORTANT RULES:
-- Start by asking for their name with a friendly greeting
-- Ask ONE question at a time and wait for their response
-- Keep track of what you've already collected
-- After getting an answer, acknowledge it briefly and ask the next question
-- Once you have all 5 pieces of information, let them know you're done collecting data
-- Then offer to answer questions about their finances (net worth, totals, etc.)
-- Be conversational and natural
 
 When answering questions after data collection:
-- Calculate net worth as: cash + retirement savings
-- Provide clear, formatted numbers with dollar signs
+- Calculate total assets as the sum of: cash, brokerage, retirement savings, pension, annuities, properties, otherAssets
+- Calculate total liabilities as the sum of: mortgage, autoLoan, studentLoans, otherDebts
+- Calculate net worth as: total assets - total liabilities
+- Provide clear, formatted numbers with dollar signs and commas (for example: $12,345.67)
+- Show both total assets (with a short breakdown by category) and net worth (with a short breakdown of liabilities)
 - Be helpful and informative`;
 
 // ==========================================
@@ -54,8 +60,17 @@ class ConversationState {
       { id: 'name', question: 'What is your name?', field: 'name' },
       { id: 'age', question: 'What is your age?', field: 'age' },
       { id: 'income', question: 'What is your annual income?', field: 'income' },
-      { id: 'cash', question: 'How much cash do you have?', field: 'cash' },
-      { id: 'retirement', question: 'How much do you have in your retirement account?', field: 'retirement' }
+      { id: 'cash', question: 'How much cash do you have? This can include checking, savings, CD\'s and Money Market accounts', field: 'cash' },
+      { id: 'brokerage', question: 'How much in your brokerage account(s)? This can include stocks and mutual funds', field: 'brokerage' },
+      { id: 'retirement', question: 'How much do you have in your retirement account? This includes 401k, 403b, 457b, TSP, Traditional IRA, Roth IRA, SEP IRA, and SIMPLE IRA.', field: 'retirement' },
+      { id: 'pension', question: 'How much do you have in your pension?', field: 'pension' },
+    { id: 'annuities', question: 'How much do you have in annuities?', field: 'annuities' },
+  { id: 'properties', question: 'What is the total market value of all properties you own? Do not deduct the mortgage(s) value', field: 'properties' },
+  { id: 'mortgage', question: 'What is your current mortgage(s) balance?', field: 'mortgage' },
+  { id: 'autoLoan', question: 'Do you currently have any outstanding auto loans? If so, please enter the total amount owed.', field: 'autoLoan' },
+  { id: 'studentLoans', question: 'Do you currently have any outstanding student loans? If so, please enter the total amount owed.', field: 'studentLoans' },
+  { id: 'otherDebts', question: 'Do you have any other outstanding debts? If so, please enter the total amount owed.', field: 'otherDebts' },
+  { id: 'otherAssets', question: 'Do you own any other assets such as art, collectibles, or antiques? If so, please enter their total estimated value.', field: 'otherAssets' }
     ];
     this.conversationHistory = [];
   }
@@ -125,7 +140,7 @@ const TOOLS = [
       properties: {
         field: {
           type: "string",
-          enum: ["name", "age", "income", "cash", "retirement"],
+          enum: ["name", "age", "income", "cash", "brokerage", "retirement", "pension", "annuities", "otherAssets", "properties", "mortgage", "autoLoan", "studentLoans", "otherDebts"],
           description: "The field name for the data being stored"
         },
         value: {
@@ -177,7 +192,7 @@ app.post('/chat/structured', async (req, res) => {
     const state = sessions.get(sessionId);
     
     // If first message, greet and ask first question
-    if (state.conversationHistory.length === 0) {
+    if (req.body.message === 'start' || req.body.isInitial/* state.conversationHistory.length === 0 */) {
       const greeting = `Hello! I'm here to collect some financial information. ${state.getCurrentQuestion()}`;
       state.conversationHistory.push({ role: 'assistant', content: greeting });
       return res.json({ response: greeting, sessionId: sessionId });
