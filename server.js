@@ -255,7 +255,7 @@ app.post('/chat/structured', async (req, res) => {
       
       // Get next question or finish
       if (state.isDataCollectionComplete()) {
-        const completion = "Great! I've collected all your information. You can now ask me questions like 'What is my net worth?' or 'Show me my information'.";
+        const completion = "Great! I've collected all your information. You can now ask me questions like 'What is my net worth?' or 'Show me my information' or 'What is my asset allocation'.";
         state.conversationHistory.push({ role: 'assistant', content: completion });
         return res.json({ response: completion, sessionId: sessionId });
       } else {
