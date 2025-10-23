@@ -38,11 +38,12 @@ Your task is to collect the following information from users IN THIS EXACT ORDER
 
 13. Other debts (ask: "Do you have any other outstanding debts? If so, please enter the total amount owed.")
 14. Other assets (ask: "Do you own any other assets such as art, collectibles, or antiques? If so, please enter their total estimated value.")
+15. Life insurance cash value (ask: "Do you have any life insurance policies (like whole life or universal life) that have built-up cash value?")
 
 IMPORTANT RULES:
 
 When answering questions after data collection:
-- Calculate total assets as the sum of: cash, brokerage, retirement savings, pension, annuities, properties, otherAssets
+- Calculate total assets as the sum of: cash, brokerage, retirement savings, pension, annuities, properties, otherAssets, cashValue
 - Calculate total liabilities as the sum of: mortgage, autoLoan, studentLoans, otherDebts
 - Calculate net worth as: total assets - total liabilities
 - Provide clear, formatted numbers with dollar signs and commas (for example: $12,345.67)
@@ -70,7 +71,8 @@ class ConversationState {
       { id: 'autoLoan', question: 'Do you currently have any outstanding auto loans? If so, please enter the total amount owed.', field: 'autoLoan' },
       { id: 'studentLoans', question: 'Do you currently have any outstanding student loans? If so, please enter the total amount owed.', field: 'studentLoans' },
       { id: 'otherDebts', question: 'Do you have any other outstanding debts? If so, please enter the total amount owed.', field: 'otherDebts' },
-      { id: 'otherAssets', question: 'Do you own any other assets such as art, collectibles, or antiques? If so, please enter their total estimated value.', field: 'otherAssets' }
+      { id: 'otherAssets', question: 'Do you own any other assets such as art, collectibles, or antiques? If so, please enter their total estimated value.', field: 'otherAssets' },
+      { id: 'cashValue', question: 'Do you have any life insurance policies (like whole life or universal life) that have built-up cash value?', field: 'cashValue' }
     ];
     this.conversationHistory = [];
   }
@@ -140,7 +142,7 @@ const TOOLS = [
       properties: {
         field: {
           type: "string",
-          enum: ["name", "age", "income", "cash", "brokerage", "retirement", "pension", "annuities", "otherAssets", "properties", "mortgage", "autoLoan", "studentLoans", "otherDebts"],
+          enum: ["name", "age", "income", "cash", "brokerage", "retirement", "pension", "annuities", "otherAssets", "properties", "mortgage", "autoLoan", "studentLoans", "otherDebts", "cashValue"],
           description: "The field name for the data being stored"
         },
         value: {
@@ -161,6 +163,52 @@ const TOOLS = [
     }
   }
 ];
+
+function calculateAssetAllocation(collectedData) {
+  // Only include asset fields, not debts
+  const assetFields = [
+    { key: 'cash', label: 'Cash' },
+    { key: 'brokerage', label: 'Brokerage' },
+    { key: 'retirement', label: 'Retirement' },
+    { key: 'pension', label: 'Pension' },
+    { key: 'annuities', label: 'Annuities' },
+    { key: 'properties', label: 'Properties' },
+    { key: 'otherAssets', label: 'Other Assets' },
+    { key: 'cashValue', label: 'Life Insurance Cash Value' }
+  ];
+
+  // Parse values as numbers, default to 0 if missing or invalid
+  return assetFields.map(({ key, label }) => ({
+    name: label,
+    value: parseFloat(
+      String(collectedData[key] || '0').replace(/[^\d.\-]/g, '')
+    ) || 0
+  })).filter(a => a.value > 0);
+}
+
+// Example: Detecting asset allocation request and returning chart data
+function handleAssetAllocationRequest(userMessage, collectedData) {
+  const lowerMessage = userMessage.toLowerCase();
+  
+  // Check if user is asking for asset allocation
+  if (lowerMessage.includes('asset allocation') || 
+      lowerMessage.includes('show me my assets') ||
+      lowerMessage.includes('portfolio breakdown')) {
+    
+    // Example: Calculate asset allocation from collected data
+    // You would replace this with your actual logic
+    const assetAllocation = calculateAssetAllocation(collectedData);
+    
+    return {
+      response: "Here's your current asset allocation:",
+      chartData: assetAllocation,
+      chartType: 'pie',
+      collectedData: collectedData
+    };
+  }
+  
+  return null;
+}
 
 const SYSTEM_PROMPT_WITH_TOOLS = `You are a financial data collection assistant with access to tools.
 
@@ -215,6 +263,11 @@ app.post('/chat/structured', async (req, res) => {
         state.conversationHistory.push({ role: 'assistant', content: nextQuestion });
         return res.json({ response: nextQuestion, sessionId: sessionId });
       }
+    }
+
+    const assetResponse = handleAssetAllocationRequest(message, state.collectedData);
+    if (assetResponse) {
+      return res.json(assetResponse);
     }
 
     // Data collection complete - use Claude to answer questions
