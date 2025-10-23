@@ -64,13 +64,13 @@ class ConversationState {
       { id: 'brokerage', question: 'How much in your brokerage account(s)? This can include stocks and mutual funds', field: 'brokerage' },
       { id: 'retirement', question: 'How much do you have in your retirement account? This includes 401k, 403b, 457b, TSP, Traditional IRA, Roth IRA, SEP IRA, and SIMPLE IRA.', field: 'retirement' },
       { id: 'pension', question: 'How much do you have in your pension?', field: 'pension' },
-    { id: 'annuities', question: 'How much do you have in annuities?', field: 'annuities' },
-  { id: 'properties', question: 'What is the total market value of all properties you own? Do not deduct the mortgage(s) value', field: 'properties' },
-  { id: 'mortgage', question: 'What is your current mortgage(s) balance?', field: 'mortgage' },
-  { id: 'autoLoan', question: 'Do you currently have any outstanding auto loans? If so, please enter the total amount owed.', field: 'autoLoan' },
-  { id: 'studentLoans', question: 'Do you currently have any outstanding student loans? If so, please enter the total amount owed.', field: 'studentLoans' },
-  { id: 'otherDebts', question: 'Do you have any other outstanding debts? If so, please enter the total amount owed.', field: 'otherDebts' },
-  { id: 'otherAssets', question: 'Do you own any other assets such as art, collectibles, or antiques? If so, please enter their total estimated value.', field: 'otherAssets' }
+      { id: 'annuities', question: 'How much do you have in annuities?', field: 'annuities' },
+      { id: 'properties', question: 'What is the total market value of all properties you own? Do not deduct the mortgage(s) value', field: 'properties' },
+      { id: 'mortgage', question: 'What is your current mortgage(s) balance?', field: 'mortgage' },
+      { id: 'autoLoan', question: 'Do you currently have any outstanding auto loans? If so, please enter the total amount owed.', field: 'autoLoan' },
+      { id: 'studentLoans', question: 'Do you currently have any outstanding student loans? If so, please enter the total amount owed.', field: 'studentLoans' },
+      { id: 'otherDebts', question: 'Do you have any other outstanding debts? If so, please enter the total amount owed.', field: 'otherDebts' },
+      { id: 'otherAssets', question: 'Do you own any other assets such as art, collectibles, or antiques? If so, please enter their total estimated value.', field: 'otherAssets' }
     ];
     this.conversationHistory = [];
   }
